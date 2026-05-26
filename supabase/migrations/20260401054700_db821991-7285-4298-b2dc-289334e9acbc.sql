@@ -1,0 +1,1 @@
+CREATE POLICY "Service role can update bookings" ON public.bookings FOR UPDATE TO service_role USING (true) WITH CHECK (true);
