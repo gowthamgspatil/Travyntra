@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Search, User, ChevronDown, LogOut, Heart, MapPin, Compass } from "lucide-react";
+import { Menu, X, User, ChevronDown, LogOut, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { TREKKING_LOCATIONS } from "@/lib/trekking";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -27,9 +25,6 @@ const moreItems = [
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,36 +35,6 @@ const Navbar = () => {
     navigate("/");
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setSearchOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setSearchOpen(false);
-    setSearchQuery("");
-  }, [location.pathname]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    navigate(`/packages?search=${encodeURIComponent(searchQuery)}`);
-    setSearchOpen(false);
-  };
-
-  // Autocomplete mock data based on query
-  const searchResults = (searchQuery.trim().length > 1) 
-    ? [
-        ...TREKKING_LOCATIONS.filter(loc => loc.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 3).map(loc => ({ type: 'destination', title: loc, icon: <MapPin className="w-4 h-4 text-muted-foreground mr-2"/>, link: `/packages?search=${loc}` })),
-        { type: 'activity', title: `${searchQuery} Trekking`, icon: <Compass className="w-4 h-4 text-muted-foreground mr-2"/>, link: `/packages?category=trekking&search=${searchQuery}` },
-      ]
-    : [];
-
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="container flex items-center justify-between h-16">
@@ -77,32 +42,6 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2">
             <span className="text-2xl font-heading font-extrabold text-gradient-primary">Travyntra</span>
           </Link>
-
-          {/* Desktop Search Bar */}
-          <div className="hidden md:block relative" ref={searchRef}>
-            <form onSubmit={handleSearchSubmit} className="relative w-64 lg:w-80 group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input 
-                placeholder="Search destinations, tours..." 
-                className="pl-9 bg-secondary/50 border-transparent focus-visible:bg-background focus-visible:ring-1 focus-visible:ring-primary/30 h-10 rounded-full"
-                value={searchQuery}
-                onFocus={() => setSearchOpen(true)}
-                onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
-              />
-            </form>
-            
-            {searchOpen && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden py-2 animate-in fade-in zoom-in-95 duration-200">
-                <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Results</div>
-                {searchResults.map((res, i) => (
-                  <Link key={i} to={res.link} className="flex items-center px-4 py-2.5 hover:bg-secondary cursor-pointer transition-colors text-sm">
-                    {res.icon}
-                    <span className="font-medium text-foreground">{res.title}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         <nav className="hidden lg:flex items-center gap-1">
@@ -126,9 +65,6 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button className="p-2 rounded-full hover:bg-secondary transition-colors md:hidden" onClick={() => setMobileOpen(true)}>
-            <Search className="w-5 h-5 text-muted-foreground" />
-          </button>
           {user && (
             <Link to="/wishlist" className="p-2 rounded-full hover:bg-secondary transition-colors">
               <Heart className="w-5 h-5 text-muted-foreground" />

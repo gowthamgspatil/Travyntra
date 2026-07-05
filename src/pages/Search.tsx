@@ -146,7 +146,7 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title={query ? `Search: ${query}` : "Search"} description="Search packages, resorts, and services across Karnataka." />
+      <SEO title={query ? `Search: ${query}` : "Search"} description="Search packages, resorts, and services across India." />
       <Navbar />
       <section className="py-12 sm:py-20">
         <div className="container">

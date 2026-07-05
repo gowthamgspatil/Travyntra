@@ -49,11 +49,53 @@ const ReviewSection = ({ destination }: { destination: string }) => {
       .eq("destination", destination)
       .order("created_at", { ascending: false });
 
-    if (data) {
+    if (data && data.length > 0) {
       setReviews(data);
       if (user) {
         const existing = data.find((r) => r.user_id === user.id);
         if (existing) setUserReview(existing);
+      }
+    } else {
+      // If no reviews from DB, provide a small set of mock reviews for specific packages (eg: Agumbe)
+      if (typeof destination === "string" && destination.toLowerCase().includes("agumbe")) {
+        const sampleComments = [
+          "Amazing experience — the rainforest walk was magical!",
+          "Well organised trip, great food and guides.",
+          "Breathtaking sunset views. Highly recommended.",
+          "Excellent trek, a bit challenging but worth it.",
+          "Loved the waterfalls and the guide's local knowledge.",
+          "Accommodation was comfortable and the transport was on time.",
+          "A memorable trip with friendly crew and good safety measures.",
+          "Good value for money. Would join again.",
+          "Kids enjoyed the nature trails and easy walks.",
+          "Perfect weekend escape from Bangalore."
+        ];
+        const sampleNames = [
+          'Arjun',
+          'Priya',
+          'Rohit',
+          'Ananya',
+          'Kumar',
+          'Sneha',
+          'Vivek',
+          'Deepa',
+          'Manjunath',
+          'Lakshmi'
+        ];
+
+        const mockCount = 5;
+        const mockReviews: Review[] = Array.from({ length: mockCount }).map((_, i) => ({
+          id: `mock-agumbe-${i + 1}`,
+          user_id: `mock-user-${i + 1}`,
+          destination,
+          rating: 5 - (i % 2),
+          comment: sampleComments[i] || null,
+          created_at: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+          profiles: { display_name: sampleNames[i] || `Guest ${i + 1}`, avatar_url: null },
+        }));
+        setReviews(mockReviews);
+      } else if (data) {
+        setReviews(data);
       }
     }
     setLoading(false);
@@ -140,7 +182,7 @@ const ReviewSection = ({ destination }: { destination: string }) => {
                   <User className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">Traveler</p>
+                  <p className="text-sm font-medium text-foreground">{review.profiles?.display_name || 'Traveler'}</p>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(review.created_at), "MMM d, yyyy")}
                   </p>

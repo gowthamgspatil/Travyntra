@@ -3,8 +3,8 @@ import { Compass, Mountain, Palmtree, Ship, Camera, Tent } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const experiences = [
-  { icon: <Mountain className="w-7 h-7" />, title: "Trekking", count: "120+ Tours", category: "trekking" },
-  { icon: <Palmtree className="w-7 h-7" />, title: "Beach Holidays", count: "85+ Tours", category: "beach" },
+  { icon: <Mountain className="w-7 h-7" />, title: "Trekking", count: "20+ Places", category: "trekking" },
+  { icon: <Palmtree className="w-7 h-7" />, title: "Beach Holidays", count: "10+ Tours", category: "beach" },
   { icon: <Ship className="w-7 h-7" />, title: "Cruises", count: "45+ Tours", category: "cruise" },
   { icon: <Camera className="w-7 h-7" />, title: "Photography Tours", count: "30+ Tours", category: "photography" },
   { icon: <Tent className="w-7 h-7" />, title: "Camping", count: "60+ Tours", category: "camping" },

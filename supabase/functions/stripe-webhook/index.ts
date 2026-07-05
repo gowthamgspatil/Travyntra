@@ -69,6 +69,40 @@ serve(async (req) => {
               .order("created_at", { ascending: false }).limit(1);
           }
           console.log(`Booking updated mapped to batch ${session.metadata.batch_id} for user ${session.metadata.user_id}`);
+
+          // Send booking confirmation email
+          try {
+            const emailResponse = await fetch(
+              `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-confirmation`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+                },
+                body: JSON.stringify({
+                  userId: session.metadata.user_id,
+                  batchId: session.metadata.batch_id,
+                  packageTitle: session.metadata.package_title || "Your Package",
+                  departureDate: session.metadata.departure_date || new Date().toISOString(),
+                  returnDate: session.metadata.return_date || new Date().toISOString(),
+                  travelers: travelersCount,
+                  addons: addons,
+                  totalAmount: totalAmount,
+                  walletUsed: walletUsed,
+                  paymentMethod: "Stripe Card",
+                }),
+              }
+            );
+
+            if (!emailResponse.ok) {
+              console.error("Failed to send confirmation email:", await emailResponse.text());
+            } else {
+              console.log("Booking confirmation email sent successfully");
+            }
+          } catch (emailError) {
+            console.error("Error calling send-booking-confirmation:", emailError);
+          }
         }
       }
     }

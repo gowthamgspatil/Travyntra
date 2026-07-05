@@ -18,8 +18,31 @@ import ReviewSection from "@/components/ReviewSection";
 import SEO from "@/components/SEO";
 import WeatherWidget from "@/components/WeatherWidget";
 import { TREKKING_LOCATIONS, AGUMBE_TEMPLATE } from "@/lib/trekking";
+import BEACHES from "@/data/beaches";
+import cruiseImages from "@/data/cruiseImages";
 import { Calendar } from "@/components/ui/calendar";
 import useEmblaCarousel from "embla-carousel-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+
+const localMockPackages: Record<string, any> = {
+  "kerala-1": { id: "kerala-1", title: "Kerala Backwaters Retreat", category: "resort", price: 45000, duration: "5 days & 4 nights", location: "Kerala, India", description: "Experience the serenity of the Kerala backwaters on a traditional houseboat. Includes scenic tours and authentic local cuisine.", images: ["/assets/dest-kerala.jpg"], featured: true, rating: 4.9, review_count: 156, max_group_size: 15 },
+  "kerala-2": { id: "kerala-2", title: "Munnar Hill Station Getaway", category: "resort", price: 35000, duration: "4 days & 3 nights", location: "Munnar, Kerala", description: "Escape to the beautiful tea gardens of Munnar with breathtaking views and cooling weather.", images: ["https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800"], featured: false, rating: 4.8, review_count: 92, max_group_size: 20 },
+  "kerala-3": { id: "kerala-3", title: "Wayanad Nature Trail", category: "trekking", price: 42000, duration: "6 days & 5 nights", location: "Wayanad, Kerala", description: "A combination of wildlife sightings, spice plantations, and forest trails in Wayanad.", images: ["https://images.unsplash.com/photo-1593693397690-362cb9666d6c?q=80&w=800"], featured: false, rating: 4.7, review_count: 120, max_group_size: 12 },
+  "raj-1": { id: "raj-1", title: "Royal Jaipur Experience", category: "heritage", price: 55000, duration: "6 days & 5 nights", location: "Jaipur, Rajasthan", description: "Live like royalty and explore the majestic forts and palaces of the Pink City.", images: ["https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=800"], featured: true, rating: 4.8, review_count: 210, max_group_size: 25 },
+  "raj-2": { id: "raj-2", title: "Udaipur Lakes & Palaces", category: "heritage", price: 48000, duration: "5 days & 4 nights", location: "Udaipur, Rajasthan", description: "Romantic getaways to the city of lakes, filled with spectacular heritage architecture.", images: ["https://images.unsplash.com/photo-1615836245337-f8e28cf69a1b?q=80&w=800"], featured: false, rating: 4.7, review_count: 184, max_group_size: 15 },
+  "raj-3": { id: "raj-3", title: "Jaisalmer Desert Safari", category: "adventure", price: 38000, duration: "4 days & 3 nights", location: "Jaisalmer, Rajasthan", description: "Camp under the stars on golden sand dunes, enjoying folk music and desert safaris.", images: ["https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=800"], featured: false, rating: 4.9, review_count: 95, max_group_size: 20 },
+  
+  "him-1": { id: "him-1", title: "Manali Snow Adventure", category: "adventure", price: 45000, duration: "6 days & 5 nights", location: "Manali, Himachal", description: "Thrilling snow activities, skiing, and breathtaking mountain views in Manali.", images: ["https://images.unsplash.com/photo-1605649487212-4dcb1b6b1833?q=80&w=800"], featured: true, rating: 4.8, review_count: 260, max_group_size: 20 },
+  "him-2": { id: "him-2", title: "Shimla Valley Escape", category: "resort", price: 38000, duration: "5 days & 4 nights", location: "Shimla, Himachal", description: "A classic retreat to the queen of hills, complete with mall road walks and heritage stays.", images: ["https://images.unsplash.com/photo-1596894002674-0cd3422c5e53?q=80&w=800"], featured: false, rating: 4.6, review_count: 198, max_group_size: 25 },
+  "him-3": { id: "him-3", title: "Spiti Valley Road Trip", category: "adventure", price: 65000, duration: "8 days & 7 nights", location: "Spiti Valley, Himachal", description: "An epic road trip through rugged terrains, ancient monasteries, and spectacular heights.", images: ["https://images.unsplash.com/photo-1618774797053-5353d26f6341?q=80&w=800"], featured: false, rating: 4.9, review_count: 112, max_group_size: 12 },
+};
 
 interface PackageData {
   id: string;
@@ -40,6 +63,8 @@ interface PackageData {
   pickup_points?: string[];
   things_to_carry?: string[];
   cancellation_policy?: string[];
+  video_urls?: string[];
+  video_captions?: string[];
 }
 
 interface Batch {
@@ -86,7 +111,73 @@ const PackageDetail = () => {
   const [customItineraryResponse, setCustomItineraryResponse] = useState("");
   const [customItineraryRequest, setCustomItineraryRequest] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [emblaRef] = useEmblaCarousel({ loop: true });
+  const [bookingDrawerOpen, setBookingDrawerOpen] = useState(false);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const isVideoSrc = (src: string) => {
+    if (!src) return false;
+    const s = src.toLowerCase();
+    return s.endsWith('.mp4') || s.includes('youtube.com') || s.includes('youtu.be') || s.includes('vimeo.com');
+  };
+
+  const toEmbedUrl = (src: string) => {
+    const url = new URL(src, window.location.origin);
+    const autoplay = '1';
+    const mute = '1';
+    if (src.includes('youtu.be')) {
+      const id = url.pathname.replace('/', '');
+      return `https://www.youtube.com/embed/${id}?autoplay=${autoplay}&mute=${mute}&playsinline=1&rel=0`;
+    }
+    if (src.includes('youtube.com/watch')) {
+      const videoId = url.searchParams.get('v');
+      return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay}&mute=${mute}&playsinline=1&rel=0`;
+    }
+    if (src.includes('youtube.com/embed')) {
+      const base = src.split('?')[0];
+      return `${base}?autoplay=${autoplay}&mute=${mute}&playsinline=1&rel=0`;
+    }
+    if (src.includes('vimeo.com')) {
+      const id = url.pathname.split('/').filter(Boolean).pop();
+      return `https://player.vimeo.com/video/${id}?autoplay=${autoplay}&muted=${mute}&title=0&byline=0&portrait=0`;
+    }
+    return src;
+  };
+
+  const prevImage = () => goToMedia((currentImageIndex - 1 + galleryItems.length) % galleryItems.length);
+  const nextImage = () => goToMedia((currentImageIndex + 1) % galleryItems.length);
+
+  const goToMedia = (index: number) => {
+    if (!galleryItems.length) return;
+    const nextIndex = (index + galleryItems.length) % galleryItems.length;
+    setCurrentImageIndex(nextIndex);
+    emblaApi?.scrollTo(nextIndex);
+  };
+
+  useEffect(() => {
+    if (!imageDialogOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prevImage();
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'Escape') setImageDialogOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imageDialogOpen]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const syncSelectedIndex = () => {
+      const selectedIndex = emblaApi.selectedScrollSnap();
+      setCurrentImageIndex(selectedIndex);
+    };
+    syncSelectedIndex();
+    emblaApi.on('select', syncSelectedIndex);
+    return () => {
+      emblaApi.off('select', syncSelectedIndex);
+    };
+  }, [emblaApi]);
 
   const handleCustomizeItinerary = async () => {
     if (!customItineraryRequest.trim()) return;
@@ -140,8 +231,46 @@ const PackageDetail = () => {
       supabase.from("packages").select("*").eq("id", id!).single(),
       supabase.from("batches").select("*").eq("package_id", id!).eq("status", "open").order("start_date"),
     ]);
+
+    if (id && localMockPackages[id]) {
+      // If this mock package is the unwanted package, redirect away
+      if (localMockPackages[id].title === 'Udupi & Malpe Coast') {
+        navigate('/packages');
+        setLoading(false);
+        return;
+      }
+      setPkg(localMockPackages[id]);
+      
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const nextWeek = new Date(tomorrow);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+
+      setBatches([
+        {
+          id: `batch-${id}-1`,
+          title: "Upcoming Batch",
+          start_date: tomorrow.toISOString(),
+          end_date: nextWeek.toISOString(),
+          max_capacity: localMockPackages[id].max_group_size || 20,
+          current_count: 5,
+          price: localMockPackages[id].price,
+          status: "open",
+        }
+      ]);
+      setLoading(false);
+      return;
+    }
+
     if (pkgRes.data) {
-      setPkg(pkgRes.data as PackageData);
+      // If upstream package is a beach package, redirect and do not show
+      const upstreamPkg = pkgRes.data as PackageData;
+      if (upstreamPkg.title === 'Udupi & Malpe Coast' || upstreamPkg.title === 'Gokarna Beach Bliss' || upstreamPkg.category === 'beach') {
+        navigate('/packages');
+        setLoading(false);
+        return;
+      }
+      setPkg(upstreamPkg);
     } else if (id?.startsWith('mock-')) {
       // reconstruct mock package client-side — use the same filtered trekking list as Packages.tsx
       const idx = parseInt(id.replace('mock-', ''), 10);
@@ -149,7 +278,7 @@ const PackageDetail = () => {
       const loc = trekkingLocations[idx];
       if (loc) {
         if (loc === 'Agumbe') {
-          setPkg({ ...AGUMBE_TEMPLATE, id });
+          setPkg({ ...AGUMBE_TEMPLATE, id } as PackageData);
         } else {
           setPkg({
             id,
@@ -157,7 +286,7 @@ const PackageDetail = () => {
             category: 'trekking',
             price: 4800,
             duration: '1 Day / 1 Night',
-            location: `${loc}, Karnataka`,
+            location: `${loc}, India`,
             description: `Experience trekking at ${loc}.`,
             images: [],
             featured: false,
@@ -166,6 +295,50 @@ const PackageDetail = () => {
             max_group_size: 12,
           } as PackageData);
         }
+      }
+    }
+    else if (id?.startsWith('beach-mock-')) {
+      // Reconstruct beach mock packages created in Packages.tsx
+      const idx = parseInt(id.replace('beach-mock-', ''), 10);
+      const b = BEACHES[idx];
+      if (b) {
+        setPkg({
+          id,
+          title: `${b.name} Getaway`,
+          category: 'beach',
+          price: 3999 + (idx % 4) * 1000,
+          duration: `${2 + (idx % 3)} Days / ${1 + (idx % 2)} Nights`,
+          location: b.location || b.name,
+          description: b.short,
+          images: [b.image],
+          featured: idx === 0,
+          rating: 4.5 - (idx % 3) * 0.1,
+          review_count: Math.max(0, 50 - idx * 3),
+          max_group_size: 20,
+          itinerary: [],
+        } as PackageData);
+      }
+    } else if (id?.startsWith('cruise-mock-')) {
+      // Reconstruct cruise mock packages from CRUISES list
+      const idx = parseInt(id.replace('cruise-mock-', ''), 10);
+      const c = await import("@/data/cruises").then(m => m.default[idx]);
+      if (c) {
+        const imageUrl = cruiseImages[c] || `https://source.unsplash.com/1200x800/?cruise,ship,sea&sig=${idx}`;
+        setPkg({
+          id,
+          title: c,
+          category: 'cruise',
+          price: 4999 + (idx % 6) * 2500,
+          duration: `${2 + (idx % 5)} Days / ${1 + (idx % 3)} Nights`,
+          location: c.includes('Goa') ? 'Goa, India' : `${c.split(' ')[0]}, India`,
+          description: `Experience the ${c} with comfortable amenities and scenic views.`,
+          images: [imageUrl],
+          featured: idx === 0,
+          rating: 4.5 - (idx % 4) * 0.1,
+          review_count: 40 + (idx % 50),
+          max_group_size: 30,
+          itinerary: [],
+        } as PackageData);
       }
     }
     if (batchRes.data) setBatches(batchRes.data as Batch[]);
@@ -313,6 +486,8 @@ const PackageDetail = () => {
 
   const defaultImage = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80";
   const images = pkg.images?.length ? pkg.images : [defaultImage, "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=80", "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1200&q=80"];
+  const videoSources = pkg.video_urls || [];
+  const galleryItems = [...images, ...videoSources];
 
   return (
     <div className="min-h-screen bg-background">
@@ -339,16 +514,44 @@ const PackageDetail = () => {
 
       {/* Thrillophilia style Hero Carousel */}
       <div className="relative h-[50vh] sm:h-[65vh] bg-neutral-900 group">
-        <div className="overflow-hidden h-full" ref={emblaRef}>
+          <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full">
             {images.map((img, i) => (
                <div key={i} className="flex-[0_0_100%] min-w-0 relative h-full">
-                  <img src={img} alt={`${pkg.title} - ${i}`} className="w-full h-full object-cover" />
+                 <img src={img} alt={`${pkg.title} - ${i}`} className="w-full h-full object-cover cursor-zoom-in" onClick={() => { setCurrentImageIndex(i); setImageDialogOpen(true); }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
                </div>
             ))}
           </div>
         </div>
+          {/* Thumbnails removed as requested */}
+
+        {/* Image Lightbox Dialog */}
+        <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+          <DialogContent className="sm:max-w-4xl p-0 bg-black/90">
+            <div className="relative flex items-center justify-center">
+              <button onClick={() => setImageDialogOpen(false)} className="absolute top-4 right-4 z-50 text-white bg-black/40 p-2 rounded-full">Close</button>
+              <button onClick={prevImage} className="absolute left-4 z-50 text-white bg-black/40 p-2 rounded-full">‹</button>
+              <button onClick={nextImage} className="absolute right-4 z-50 text-white bg-black/40 p-2 rounded-full">›</button>
+              <div className="w-full max-h-[80vh] flex items-center justify-center">
+                {isVideoSrc(images[currentImageIndex]) ? (
+                  (images[currentImageIndex].includes('youtube.com') || images[currentImageIndex].includes('youtu.be')) ? (
+                    <iframe title={`video-${currentImageIndex}`} src={images[currentImageIndex]} className="w-full h-[70vh]" frameBorder="0" allowFullScreen />
+                  ) : (
+                    <video src={images[currentImageIndex]} controls className="w-full h-[70vh] object-contain" />
+                  )
+                ) : (
+                  <img src={images[currentImageIndex]} alt={`lightbox-${currentImageIndex}`} className="w-full h-[70vh] object-contain" />
+                )}
+              </div>
+              <div className="absolute bottom-4 left-0 right-0 text-center text-white/90">
+                <div className="text-sm font-medium">{pkg.title} — {currentImageIndex + 1}/{images.length}</div>
+                <div className="text-xs mt-1">{images[currentImageIndex]}</div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <div className="absolute top-24 left-0 right-0 z-10 px-4">
             <div className="container flex justify-between items-center">
               <Button variant="outline" size="sm" asChild className="bg-background/80 backdrop-blur-sm border-none shadow-sm hover:bg-background">
@@ -356,9 +559,62 @@ const PackageDetail = () => {
                   <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </Link>
               </Button>
-              <Button variant="secondary" size="sm" className="bg-background/80 backdrop-blur-sm border-none shadow-sm shadow-black/20 hover:bg-background">
-                <MapPin className="w-4 h-4 mr-2" /> View Map
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="sm" className="bg-background/80 backdrop-blur-sm border-none shadow-sm shadow-black/20 hover:bg-background">
+                    <MapPin className="w-4 h-4 mr-2" /> View Map
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[720px] max-h-[85vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{pkg.title} Map Guide</DialogTitle>
+                    <DialogDescription>
+                      Tap any location below to open it in Google Maps.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4 pt-2">
+                    {pkg.key_locations && pkg.key_locations.length > 0 ? (
+                      Object.entries(
+                        pkg.key_locations.reduce<Record<string, typeof pkg.key_locations>>((groups, location) => {
+                          if (!groups[location.day]) groups[location.day] = [];
+                          groups[location.day].push(location);
+                          return groups;
+                        }, {})
+                      ).map(([day, locations]) => (
+                        <div key={day} className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{day}</span>
+                            <span className="h-px flex-1 bg-border" />
+                          </div>
+                          <div className="grid gap-3">
+                            {locations.map((location, index) => (
+                              <a
+                                key={`${location.name}-${index}`}
+                                href={location.map_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block rounded-xl border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <h4 className="font-heading font-semibold text-foreground">{location.name}</h4>
+                                  </div>
+                                  <MapPin className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+                                </div>
+                                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{location.description}</p>
+                                <p className="mt-3 text-xs font-medium text-primary">Open in Google Maps</p>
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No map locations are available for this package.</p>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
         </div>
 
@@ -373,7 +629,7 @@ const PackageDetail = () => {
               <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm"><MapPin className="w-4 h-4" />{pkg.location}</span>
               <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm"><Clock className="w-4 h-4" />{pkg.duration}</span>
               <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm"><Users className="w-4 h-4" />Max {pkg.max_group_size || 20}</span>
-              <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />{pkg.rating || "4.8"} ({(pkg.review_count || 0) + 124} Reviews)</span>
+              <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />{pkg.rating || "4.8"} ({pkg.review_count || 0} Reviews)</span>
             </div>
           </div>
         </div>
@@ -522,44 +778,6 @@ const PackageDetail = () => {
               </motion.div>
             )}
 
-            {/* Batches */}
-            {batches.length > 0 && (
-              <motion.div id="batches" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <h3 className="text-xl font-heading font-semibold text-foreground mb-4">Upcoming Batches</h3>
-                <div className="space-y-3">
-                  {batches.map((batch) => {
-                    const spotsLeft = Math.max(0, (batch.max_capacity || 0) - (batch.current_count || 0));
-                    const isFull = spotsLeft <= 0;
-                    
-                    return (
-                    <div key={batch.id} className="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <h4 className="font-heading font-medium text-foreground">{batch.title}</h4>
-                            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mt-1">
-                              <span className="flex items-center gap-1"><CalendarIcon className="w-3.5 h-3.5" />{format(new Date(batch.start_date), "MMM d")} – {format(new Date(batch.end_date), "MMM d, yyyy")}</span>
-                              <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{batch.current_count}/{batch.max_capacity} joined · <span className={spotsLeft <= 3 ? "text-destructive font-semibold" : ""}>{spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} left</span></span>
-                              <span className="font-heading font-bold text-foreground">₹{batch.price.toLocaleString()}</span>
-                            </div>
-                            {spotsLeft > 0 && spotsLeft <= 5 && (
-                              <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> high demand! only {spotsLeft} remaining.
-                              </p>
-                            )}
-                          </div>
-                          <Button
-                            size="sm"
-                            variant={isFull ? "outline" : "default"}
-                            disabled={joiningBatch === batch.id}
-                            onClick={() => isFull ? handleJoinWaitlist(batch.id) : handleJoinBatch(batch.id)}
-                          >
-                            {joiningBatch === batch.id ? <Loader2 className="w-4 h-4 animate-spin" /> : isFull ? "Join Waitlist" : "Join Batch"}
-                          </Button>
-                    </div>
-                  )})}
-                </div>
-              </motion.div>
-            )}
-
             {/* Reviews */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <ReviewSection destination={pkg.title} />
@@ -667,6 +885,16 @@ const PackageDetail = () => {
               </div>
             )}
           </motion.div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky CTA Bar */}
+      <div className="fixed bottom-4 left-0 right-0 z-50 flex items-center justify-center sm:hidden px-4">
+        <div className="w-full max-w-3xl bg-card/95 backdrop-blur-md border border-border rounded-full p-2 flex gap-3 items-center shadow-lg">
+          <Button className="flex-1 h-12" onClick={() => { document.getElementById('batches')?.scrollIntoView({ behavior: 'smooth' }); }}>Book Now</Button>
+          <Button variant="outline" className="h-12 w-12 p-0" asChild>
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer"><Phone className="w-5 h-5" /></a>
+          </Button>
         </div>
       </div>
 

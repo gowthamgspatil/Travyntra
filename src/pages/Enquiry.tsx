@@ -61,7 +61,7 @@ const Enquiry = () => {
                 { icon: Phone, label: "WhatsApp", desc: "Chat with us instantly", href: whatsappLink, color: "text-green-500" },
                 { icon: Instagram, label: "Instagram", desc: "Follow our travel stories", href: "https://instagram.com", color: "text-pink-500" },
                 { icon: Mail, label: "Email", desc: "hello@travelvista.com", href: "mailto:hello@travelvista.com", color: "text-primary" },
-                { icon: MapPin, label: "Office", desc: "Bangalore, Karnataka, India", href: "#", color: "text-primary" },
+                { icon: MapPin, label: "Office", desc: "Bangalore, India", href: "#", color: "text-primary" },
               ].map((item, i) => (
                 <motion.a
                   key={item.label}

@@ -31,7 +31,7 @@ interface Service {
 }
 
 const defaultImages: Record<string, string> = {
-  vehicle: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&q=80",
+  vehicle: "https://www.jcrcab.com/wp-content/uploads/2021/09/luxury-bus.jpeg",
   stay: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
   contracting: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80",
 };

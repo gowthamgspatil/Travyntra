@@ -174,7 +174,7 @@ const ChatWidget = () => {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about Karnataka trips..."
+                placeholder="Ask about India trips..."
                 disabled={loading}
               />
               <Button type="submit" size="icon" disabled={loading || !input.trim()}>

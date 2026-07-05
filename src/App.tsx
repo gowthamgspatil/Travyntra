@@ -15,6 +15,7 @@ import Signup from "./pages/Signup.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import ExperiencesPage from "./pages/Experiences.tsx";
+// Beach pages removed from routing
 import DestinationsPage from "./pages/Destinations.tsx";
 import BlogPage from "./pages/Blog.tsx";
 import AboutPage from "./pages/About.tsx";
@@ -31,6 +32,8 @@ import PackageDetail from "./pages/PackageDetail.tsx";
 import Services from "./pages/Services.tsx";
 import Partners from "./pages/Partners.tsx";
 import Enquiry from "./pages/Enquiry.tsx";
+import BeachHolidays from "./pages/BeachHolidays";
+import BeachDetail from "./pages/BeachDetail";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +55,8 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/experiences" element={<ExperiencesPage />} />
+            <Route path="/experiences/beach-holidays" element={<BeachHolidays />} />
+            <Route path="/experiences/beach/:slug" element={<BeachDetail />} />
             <Route path="/destinations" element={<DestinationsPage />} />
             <Route path="/destinations/:slug" element={<DestinationDetail />} />
             <Route path="/packages" element={<Packages />} />

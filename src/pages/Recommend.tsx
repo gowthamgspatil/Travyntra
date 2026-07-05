@@ -44,12 +44,12 @@ const Recommend = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title="AI Travel Recommendations" description="Get personalized Karnataka trip recommendations powered by AI." />
+      <SEO title="AI Travel Recommendations" description="Get personalized India trip recommendations powered by AI." />
       <Navbar />
       <div className="container py-12 max-w-3xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <Badge className="mb-3 gap-1"><Sparkles className="w-3 h-3" /> AI-Powered</Badge>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold mb-2">Find Your Perfect Karnataka Trip</h1>
+          <h1 className="text-3xl sm:text-4xl font-heading font-bold mb-2">Find Your Perfect India Trip</h1>
           <p className="text-muted-foreground">Tell us what you love and we'll match you with handpicked packages.</p>
         </motion.div>
 

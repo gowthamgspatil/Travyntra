@@ -1,63 +1,57 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Clock, ArrowRight, Flame, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import destIceland from "@/assets/dest-iceland.jpg";
-import destJapan from "@/assets/dest-japan.jpg";
-import destMaldives from "@/assets/dest-maldives.jpg";
-import destSwitzerland from "@/assets/dest-switzerland.jpg";
-import destDubai from "@/assets/dest-dubai.jpg";
-import destGreece from "@/assets/dest-greece.jpg";
 import destKerala from "@/assets/dest-kerala.jpg";
-import destThailand from "@/assets/dest-thailand.jpg";
 
 const destinations = [
   {
-    id: "trending",
-    label: "Trending",
+    id: "kerala",
+    label: "Kerala",
     icon: <Flame className="w-4 h-4" />,
     tours: [
-      { title: "Scenic Iceland with Diamond Circle", image: destIceland, days: "7 days & 6 nights", rating: 4.5, reviews: 40, price: "$3,248", save: "$804" },
-      { title: "Cherry Blossom Japan Adventure", image: destJapan, days: "10 days & 9 nights", rating: 4.8, reviews: 112, price: "$4,200", save: "$650" },
-      { title: "Maldives Luxury Escape", image: destMaldives, days: "5 days & 4 nights", rating: 5.0, reviews: 614, price: "$3,609", save: "$894" },
+      { id: "kerala-1", title: "Kerala Backwaters Retreat", image: destKerala, days: "5 days & 4 nights", rating: 4.9, reviews: 156, price: "₹45,000", save: "₹5,000" },
+      { id: "kerala-2", title: "Munnar Hill Station Getaway", image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800", days: "4 days & 3 nights", rating: 4.8, reviews: 92, price: "₹35,000", save: "₹4,500" },
+      { id: "kerala-3", title: "Wayanad Nature Trail", image: "https://images.unsplash.com/photo-1593693397690-362cb9666d6c?q=80&w=800", days: "6 days & 5 nights", rating: 4.7, reviews: 120, price: "₹42,000", save: "₹6,000" },
     ],
   },
   {
-    id: "europe",
-    label: "Europe",
+    id: "rajasthan",
+    label: "Rajasthan",
     icon: null,
     badge: "Trending",
     tours: [
-      { title: "Greek Islands Odyssey", image: destGreece, days: "8 days & 7 nights", rating: 4.7, reviews: 89, price: "$2,950", save: "$500" },
-      { title: "Swiss Alps Adventure Trek", image: destSwitzerland, days: "6 days & 5 nights", rating: 4.6, reviews: 67, price: "$3,400", save: "$720" },
-      { title: "Scenic Iceland with Diamond Circle", image: destIceland, days: "7 days & 6 nights", rating: 4.5, reviews: 40, price: "$3,248", save: "$804" },
+      { id: "raj-1", title: "Royal Jaipur Experience", image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=800", days: "6 days & 5 nights", rating: 4.8, reviews: 210, price: "₹55,000", save: "₹8,000" },
+      { id: "raj-2", title: "Udaipur Lakes & Palaces", image: "https://images.unsplash.com/photo-1615836245337-f8e28cf69a1b?q=80&w=800", days: "5 days & 4 nights", rating: 4.7, reviews: 184, price: "₹48,000", save: "₹5,500" },
+      { id: "raj-3", title: "Jaisalmer Desert Safari", image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=800", days: "4 days & 3 nights", rating: 4.9, reviews: 95, price: "₹38,000", save: "₹4,000" },
     ],
   },
   {
-    id: "asia",
-    label: "Asia",
+    id: "goa",
+    label: "Goa",
     icon: null,
     tours: [
-      { title: "Cherry Blossom Japan Adventure", image: destJapan, days: "10 days & 9 nights", rating: 4.8, reviews: 112, price: "$4,200", save: "$650" },
-      { title: "Thailand Beach & Culture Tour", image: destThailand, days: "7 days & 6 nights", rating: 4.6, reviews: 203, price: "$1,890", save: "$340" },
-      { title: "Kerala Backwaters Retreat", image: destKerala, days: "5 days & 4 nights", rating: 4.9, reviews: 156, price: "$1,200", save: "$280" },
+      { id: "goa-1", title: "North Goa Beach Hop", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800", days: "5 days & 4 nights", rating: 4.6, reviews: 320, price: "₹30,000", save: "₹3,500" },
+      { id: "goa-2", title: "South Goa Luxury Resorts", image: "https://images.unsplash.com/photo-1587922546307-776227941871?q=80&w=800", days: "7 days & 6 nights", rating: 4.9, reviews: 145, price: "₹75,000", save: "₹10,000" },
+      { id: "goa-3", title: "Goan Culture & Heritage", image: "https://images.unsplash.com/photo-1560179406-1c6ca80efadc?q=80&w=800", days: "4 days & 3 nights", rating: 4.7, reviews: 88, price: "₹28,000", save: "₹3,000" },
     ],
   },
   {
-    id: "dubai",
-    label: "Dubai",
+    id: "himachal",
+    label: "Himachal",
     icon: null,
     tours: [
-      { title: "Dubai City & Desert Safari", image: destDubai, days: "5 days & 4 nights", rating: 4.7, reviews: 320, price: "$2,100", save: "$450" },
-      { title: "Maldives Luxury Escape", image: destMaldives, days: "5 days & 4 nights", rating: 5.0, reviews: 614, price: "$3,609", save: "$894" },
-      { title: "Greek Islands Odyssey", image: destGreece, days: "8 days & 7 nights", rating: 4.7, reviews: 89, price: "$2,950", save: "$500" },
+      { id: "him-1", title: "Manali Snow Adventure", image: "https://images.unsplash.com/photo-1605649487212-4dcb1b6b1833?q=80&w=800", days: "6 days & 5 nights", rating: 4.8, reviews: 260, price: "₹45,000", save: "₹6,000" },
+      { id: "him-2", title: "Shimla Valley Escape", image: "https://images.unsplash.com/photo-1596894002674-0cd3422c5e53?q=80&w=800", days: "5 days & 4 nights", rating: 4.6, reviews: 198, price: "₹38,000", save: "₹4,500" },
+      { id: "him-3", title: "Spiti Valley Road Trip", image: "https://images.unsplash.com/photo-1618774797053-5353d26f6341?q=80&w=800", days: "8 days & 7 nights", rating: 4.9, reviews: 112, price: "₹65,000", save: "₹9,000" },
     ],
   },
 ];
 
 const DestinationTabs = () => {
-  const [active, setActive] = useState("trending");
+  const [active, setActive] = useState("kerala");
   const activeDest = destinations.find((d) => d.id === active)!;
 
   return (
@@ -104,11 +98,12 @@ const DestinationTabs = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {activeDest.tours.map((tour, i) => (
-              <div
+              <Link
                 key={i}
-                className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 border border-border"
+                to={`/packages/${tour.id}`}
+                className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 border border-border block text-left"
               >
-                <div className="relative h-56 overflow-hidden">
+                <div className="relative h-56 overflow-hidden bg-muted">
                   <img
                     src={tour.image}
                     alt={tour.title}
@@ -140,7 +135,7 @@ const DestinationTabs = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </motion.div>
         </AnimatePresence>
